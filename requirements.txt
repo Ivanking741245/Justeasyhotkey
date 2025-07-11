@@ -1,0 +1,7 @@
+PyQt6
+qdarkstyle
+pyautogui
+pyperclip
+keyboard
+pyuac
+pywin32

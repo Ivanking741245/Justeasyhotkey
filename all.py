@@ -1,0 +1,3 @@
+key = ["ctrl", "alt", "shift", "cmd", "space", "enter", "tab", "esc", "up", "down", "left", "right", "delete", "page up", "page down", "home"
+       , "end", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "n", "m", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
+action = ["執行hotkey", "操作:cmd命令", "操作:點擊(次數)", "操作:點擊(時間)", "操作:滑鼠移動", "操作:輸入文字"]
