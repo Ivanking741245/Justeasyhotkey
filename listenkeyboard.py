@@ -21,6 +21,7 @@ def main():
         with keyboard.GlobalHotKeys(hotkeys) as h:
             h.join()
     dohotkey()
+    
 def getuac():
     if not pyuac.isUserAdmin():
         print("get uac.")
