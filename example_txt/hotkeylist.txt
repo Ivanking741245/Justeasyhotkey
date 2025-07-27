@@ -1,0 +1,9 @@
+<ctrl>+d
+<cmd>+<alt>
+p+m
+<ctrl>+k
+<ctrl>+<tab>+y
+o+p+y
+<esc>
+<cmd>+y
+<alt>+m

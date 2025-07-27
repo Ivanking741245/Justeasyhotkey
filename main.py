@@ -2,12 +2,14 @@ from PyQt6 import QtWidgets
 from PyQt6.QtWidgets import QMainWindow, QApplication
 from PyQt6.QtGui import QGuiApplication, QIcon
 from PyQt6.QtCore import QPoint, Qt
+from checkrule import pynput_keyboard_checkrule
 from all import *
 import subprocess
 import configparser
 import sys
 import os
 import qdarkstyle
+import traceback
 WIDTH = 1200
 HEIGHT = 800
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -38,7 +40,7 @@ class Mainwindow(QMainWindow):
         self.make_button.clicked.connect(self.click_make)
         '''
         self.firreadconfig = configparser.ConfigParser()
-        self.firreadconfig.read(rf"{PATH}\setting.ini", encoding="utf-8")
+        self.firreadconfig.read(os.path.join(PATH, "setting.ini"), encoding="utf-8")
         self.firsaveset = self.firreadconfig["database"]["save"]
 
         self.make_combobox1 = QtWidgets.QComboBox(self)
@@ -91,6 +93,21 @@ class Mainwindow(QMainWindow):
         self.make_combobox2.show()
         self.setAction.show()
         self.actionbox.show()
+        self.addlast_action()
+    def addlast_action(self):
+        if self.save.isChecked():
+            with open(os.path.join(PATH, "hotkeylist.txt")) as f:
+                hotkeytxt = f.readlines()
+                hotkeyl = []
+                hotkeyl.extend(hotkeytxt)
+                hotkeyl = [i.strip() for i in hotkeyl]
+            with open(os.path.join(PATH, "activity.txt")) as f:
+                acttxt = f.readlines()
+                actl = []
+                actl.extend(acttxt)
+                actl = [i.strip() for i in actl]
+            for i in range(len(hotkeyl)):
+                self.list_wid.addItem(f"{hotkeyl[i]} -> {actl[i]} :(上次所建立的熱鍵)")
     def show_action(self):
         def show_join(x):
             try:
@@ -156,42 +173,39 @@ class Mainwindow(QMainWindow):
     def join_action(self):
         def writehotkey():
             global hotkey
-            with open(rf"{PATH}\hotkeylist.txt", "a") as f:
+            with open(os.path.join(PATH, "hotkeylist.txt"), "a") as f:
                 firhotkey = self.make_combobox1.currentText()
                 sechotkey = self.make_combobox2.currentText()
                 try:
                     f.write(f"{firhotkey}+{sechotkey}\n")
                     hotkey = f"{firhotkey}+{sechotkey}"
                 except EOFError: pass
-                f.close()
         def writeactiv():
             #if
             global activ, war
             war = 0
             cmtype = {1: "cmd", 2: "mouse", 3: "mouse", 4: "mouse", 5:"print"}
             mousetype = {2: "cl", 3: "cl_sp", 4: "mv"}
-            with open(f"{PATH}activity.txt", "a") as f:
+            with open(os.path.join(PATH, "activity.txt"), "a") as f:
                 doactiv = action.index(self.actionbox.currentText())
+                print(doactiv)
                 if doactiv == 0:
-                    try:
-                        dokey1 = self.action_combobox1.currentText()
-                        dokey2 = self.action_combobox2.currentText()
-                        print(f"{dokey1}, {dokey2}")
-                        f.write(f"{dokey1}+{dokey2}\n")
-                        activ = f"{dokey1}+{dokey2}"
-                        f.close()
-                    except EOFError: pass
+                    #try:
+                    dokey1 = self.action_combobox1.currentText()
+                    dokey2 = self.action_combobox2.currentText()
+                    print(f"{dokey1}, {dokey2}")
+                    f.write(f"{dokey1}+{dokey2}\n")
+                    activ = f"{dokey1}+{dokey2}"
+                    #except EOFError: pass
                 elif doactiv in(1, 2, 3, 5):
                     if self.inputbox.text():
                         f.write(f"CMCM+{cmtype[doactiv]}+")
                         if list(cmtype.values()).index(cmtype[doactiv]) == 1:
                             f.write(f"{mousetype[doactiv]}+{self.inputbox.text()}\n")
                             activ = f"{mousetype[doactiv]}+{self.inputbox.text()}"
-                            f.close()
                         else:
                             f.write(f"{self.inputbox.text()}\n")
                             activ = f"{self.inputbox.text()}"
-                            f.close()
                     else:
                         warmsg = QtWidgets.QMessageBox()
                         warmsg.warning(self, "警告", "未輸入內容")
@@ -203,7 +217,6 @@ class Mainwindow(QMainWindow):
                         f.write(f"CMCM+{cmtype[doactiv]}+mv+{self.click_x.text()},{self.click_y.text()}")
                         self.list_wid.addItem(f"CMCM+{cmtype[doactiv]}+mv+{self.click_x.text()},{self.click_y.text()}")
                         activ = f"CMCM+{cmtype[doactiv]}+mv+{self.click_x.text()},{self.click_y.text()}"
-                        f.close()
                     except:
                         war1msg = QtWidgets.QMessageBox()
                         war1msg.warning(self, "警告", "未輸入內容或輸入非數字")
@@ -218,24 +231,29 @@ class Mainwindow(QMainWindow):
         warnnsg.setText("啟用監聽後將無法使用增加熱鍵等功能!確定啟用嗎?")
         warnnsg.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
         if warnnsg.exec() == QtWidgets.QMessageBox.StandardButton.Ok:
-            lispath = rf"{PATH}\listenkeyboard.py"
-            subprocess.run(["python", lispath], check=True)
+            lispath = os.path.join(PATH, "listenkeyboard.py")
+            try: 
+                pynput_keyboard_checkrule()
+                subprocess.Popen(["python", lispath], check=True)
+            except: 
+                warnnsg.setText({traceback.print_exc()})
+                app.quit()
             self.join.setDisabled(True)
             self.listen_but.setDisabled(True)
     def inisetting(self):
         config = configparser.ConfigParser()
-        config.read(rf"{PATH}\setting.ini", encoding="utf-8")
+        config.read(os.path.join(PATH, "setting.ini"), encoding="utf-8")
         save = int(config["database"]["save"])
         if self.save.isChecked():
             if save:
                 pass
             else:
-                with open(rf"{PATH}\setting.ini", "w") as f:
+                with open(os.path.join(PATH, "setting.ini"), "w") as f:
                     config["database"] = {"save": "1"}
                     config.write(f)
         else:
             if save:
-                with open(rf"{PATH}\setting.ini", "w") as f:
+                with open(os.path.join(PATH, "setting.ini"), "w") as f:
                     config["database"] = {"save": "0"}
                     config.write(f)
             else:
@@ -243,9 +261,9 @@ class Mainwindow(QMainWindow):
     def closeEvent(self, event):
         super().closeEvent(event)
         if not self.save.isChecked():
-            with open(rf"{PATH}\hotkeylist.txt", "w") as f:
+            with open(os.path.join(PATH, "hotkeylist.txt"), "w") as f:
                 pass
-            with open(rf"{PATH}\activity.txt", "w") as f:
+            with open(os.path.join(PATH, "activity.txt"), "w") as f:
                 pass
         return sys.exit(0)
 app = QApplication([*sys.argv, "--ignore-gpu-blocklist"]) #主app及系統

@@ -1,0 +1,2 @@
+CMCM+cmd+start mspaint
+cmd+d
